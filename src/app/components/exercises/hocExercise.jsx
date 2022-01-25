@@ -1,14 +1,54 @@
 import React from "react";
-import CollapseWrapper from "../../common/collapse";
-import Component from "./simpleComponent";
-import CardWrapper from "../../common/Card";
-import SmallTitle from "../../common/typografy/smallTitle";
-import withPropsStyles from "./withPropsStyles";
-import withIsAuth from "./withIsAuth";
+import CollapseWrapper from "../common/collapse";
+import PropTypes from "prop-types";
+import Divider from "../common/divider";
+import SmallTitle from "../common/typografy/smallTitle";
+import CardWrapper from "../common/Card";
+
+// Simple Component
+const SimpleComponent = ({ onLogin, onLogOut, isAuth }) => {
+    return isAuth ? (
+        <button className="btn btn-secondary" onClick={onLogOut}>
+            Выйти из системы
+        </button>
+    ) : (
+        <button className="btn btn-primary" onClick={onLogin}>
+            Войти
+        </button>
+    );
+};
+
+SimpleComponent.propTypes = {
+    onLogin: PropTypes.func,
+    onLogOut: PropTypes.func,
+    isAuth: PropTypes.bool
+};
+
+// HOC Component
+const withFunctions = (Component) => (props) => {
+    const handleLogin = () => {
+        localStorage.setItem("auth", "token");
+    };
+    const handleLogout = () => {
+        localStorage.removeItem("auth");
+    };
+    const isAuth = !!localStorage.getItem("auth");
+
+    return (
+        <CardWrapper>
+            <Component
+                isAuth={isAuth}
+                onLogOut={handleLogout}
+                onLogin={handleLogin}
+                {...props}
+            />
+        </CardWrapper>
+    );
+};
+// Component with HOC
+const ComponentWithHoc = withFunctions(SimpleComponent);
 
 const HocExercise = () => {
-    const ComponentWithIsAuth = withIsAuth(Component);
-    const NewComponent = withPropsStyles(ComponentWithIsAuth);
     return (
         <CollapseWrapper title="Упражнение">
             <p className="mt-3">
@@ -54,10 +94,9 @@ const HocExercise = () => {
                     <code>user</code> в <code>localStorage</code>
                 </li>
             </ul>
-            <CardWrapper>
-                <SmallTitle></SmallTitle>
-                <NewComponent />
-            </CardWrapper>
+            <Divider />
+            <SmallTitle>Решение</SmallTitle>
+            <ComponentWithHoc />
         </CollapseWrapper>
     );
 };
